@@ -1,3 +1,6 @@
+import hashlib
+import crcmod.predefined
+import os
 from tkinter import *
 from tkinter import ttk
 import base64
@@ -25,9 +28,11 @@ class Application:
         self.tab1 = Frame(self.notebook)
         self.tab2 = Frame(self.notebook)
 
+
         # add tabs to notebook
         self.notebook.add(self.tab1, text='Criptigrafia de Texto- Base64')
-        self.notebook.add(self.tab2, text='Tab 2')
+        self.notebook.add(self.tab2, text='Checksum')
+
 
         # set current tab
         self.notebook.select(self.tab1)
@@ -60,10 +65,10 @@ class Application:
 
             Label(about_window, text="Criptografia v1.0", font=("Arial", 16)).pack(pady=20)
             Label(about_window,
-                  text="Este programa foi desenvolvido Eduwill!",
+                  text="Este programa foi desenvolvido por Eduwill!",
                   font=("Arial", 12)).pack()
             # Add a link to a website
-            link = Label(about_window, text="Visite o meu GitHub Page!", font=("Arial", 16), fg="blue", cursor="hand2")
+            link = Label(about_window, text="Visite o meu GitHub!", font=("Arial", 16), fg="blue", cursor="hand2")
             link.pack()
             link.bind("<Button-1>", lambda e: webbrowser.open_new("https://github.com/Eduwilll"))
 
@@ -98,6 +103,7 @@ class Application:
         root.geometry(f"750x550+{x}+{y}")
 
     def contents(self):
+
         # criar as caixas de entrada e saída
         message_label = Label(self.tab1, text="Mensagem:")
         message_label.grid(row=0, column=0, padx=10, pady=10, sticky=E)
@@ -129,6 +135,70 @@ class Application:
         self.tab1.grid_columnconfigure(4, weight=1)
         self.tab1.grid_columnconfigure(3, weight=1)
 
+        #tab 2 contents
+        def open_file():
+            filetypes = (
+                ('Text files', '*.txt'),
+                ('All files', '*.*')
+            )
+            file_path = fd.askopenfilename(filetypes=filetypes)
+            if file_path:
+                # Extract the file name from the path
+                file_name = os.path.basename(file_path)
+                file_label.config(text=f"Selected File: {file_name}")
+
+                # Calculate checksums
+                calculate_checksums(file_path)
+
+        def calculate_checksums(file_path):
+
+            # Calculate MD5 checksum
+            md5 = calculate_md5(file_path)
+            md5_label.config(text=f"MD5: {md5}")
+
+            # Calculate SHA-1 checksum
+            sha1 = calculate_sha1(file_path)
+            sha1_label.config(text=f"SHA-1: {sha1}")
+
+            # Calculate SHA-256 checksum
+            sha256 = calculate_sha256(file_path)
+            sha256_label.config(text=f"SHA-256: {sha256}")
+
+        def calculate_md5(file_path):
+            hash_md5 = hashlib.md5()
+            with open(file_path, 'rb') as file:
+                for chunk in iter(lambda: file.read(4096), b''):
+                    hash_md5.update(chunk)
+            return hash_md5.hexdigest()
+
+        def calculate_sha1(file_path):
+            hash_sha1 = hashlib.sha1()
+            with open(file_path, 'rb') as file:
+                for chunk in iter(lambda: file.read(4096), b''):
+                    hash_sha1.update(chunk)
+            return hash_sha1.hexdigest()
+
+        def calculate_sha256(file_path):
+            hash_sha256 = hashlib.sha256()
+            with open(file_path, 'rb') as file:
+                for chunk in iter(lambda: file.read(4096), b''):
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()
+
+        checksum_button = Button(self.tab2, text="Open File", command=open_file)
+        checksum_button.grid(row=1, column=0, padx=10, pady=10, sticky=W + E, ipadx=50)
+
+        file_label = Label(self.tab2, text="Selected File: ")
+        file_label.grid(row=2, column=0, padx=5, pady=5, sticky=W)
+
+        md5_label = Label(self.tab2, text="MD5: ")
+        md5_label.grid(row=3, column=0, padx=5, pady=5, sticky=W)
+
+        sha1_label = Label(self.tab2, text="SHA-1: ")
+        sha1_label.grid(row=4, column=0, padx=5, pady=5, sticky=W)
+
+        sha256_label = Label(self.tab2, text="SHA-256: ")
+        sha256_label.grid(row=5, column=0, padx=5, pady=5, sticky=W)
 
 class Criptografia:
 
